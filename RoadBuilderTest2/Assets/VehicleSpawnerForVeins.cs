@@ -7,6 +7,7 @@ public class VehicleSpawnerForVeins : MonoBehaviour {
 
 	public GameObject theNPCCar; 
 	public Dictionary<string, GameObject> myObjectMap;
+	public float M_PI = 3.1415f;
 
 	// Use this for initialization
 	void Start () {
@@ -25,26 +26,64 @@ public class VehicleSpawnerForVeins : MonoBehaviour {
 		Debug.Log (text);
 		string[] stringArry = text.Split('|');
 	
-		Vector3 newPosition = new Vector3(float.Parse(stringArry[1]),120,float.Parse(stringArry[2]));
+			Vector3 newPosition = new Vector3(float.Parse(stringArry[1]),50,float.Parse(stringArry[2]));
 		
 
 			GameObject currentNPC = null;
 			if( myObjectMap.TryGetValue(stringArry[0], out currentNPC)){
 
 
+				//set rotation of car
+
+				// convert to degrees
+				float angle = float.Parse(stringArry[5]) * 180 / M_PI;
+				
+				// rotate angle so 0 is south (in OMNeT++'s angle interpretation 0 is east)
+				angle = angle + 90;
+				
+				// normalize angle to -180 <= angle < 180
+				while (angle < -180) angle += 360;
+				while (angle >= 180) angle -= 360;
+
+				currentNPC.transform.rotation = Quaternion.Euler(0,angle,0);
+
+				//set position
 				currentNPC.transform.position = newPosition;
+
+				//move in direction
+				myObjectMap[stringArry[0]].transform.Translate(myObjectMap[stringArry[0]].transform.forward * float.parse(stringArry[4]) * Time.deltaTime);
 
 			}
 
 			else{
 
 				myObjectMap.Add(stringArry[0],Instantiate(theNPCCar));
+
+
+
+				// convert to degrees
+				float angle = float.Parse(stringArry[5]) * 180 / M_PI;
+				
+				// rotate angle so 0 is south (in OMNeT++'s angle interpretation 0 is east)
+				angle = angle + 90;
+				
+				// normalize angle to -180 <= angle < 180
+				while (angle < -180) angle += 360;
+				while (angle >= 180) angle -= 360;
+
+				//rotate car model in direction
+				myObjectMap[stringArry[0]].transform.rotation = Quaternion.Euler(0,angle,0);
+
+				//place car
 				myObjectMap[stringArry[0]].transform.position = newPosition;
+
+				//move in direction
+				myObjectMap[stringArry[0]].transform.Translate(myObjectMap[stringArry[0]].transform.forward * float.parse(stringArry[4]) * Time.deltaTime);
 			}
 				
 			
 		
-			theNPCCar.transform.position = newPosition;
+			//theNPCCar.transform.position = newPosition;
 		}
 		catch (System.IO.IOException  ex){
 
